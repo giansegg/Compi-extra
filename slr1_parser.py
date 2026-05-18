@@ -1,0 +1,72 @@
+"""SLR(1) parser: uses FOLLOW sets to resolve reduce conflicts."""
+from grammar import Grammar, EOF
+from first_follow import compute_first, compute_follow
+from lr_core import build_lr0_automaton
+from lr_simulator import ActionTable, GotoTable, simulate_lr, print_lr_table
+
+
+def build_slr1_tables(
+    grammar: Grammar,
+    *,
+    verbose: bool = False,
+) -> tuple[ActionTable, GotoTable, list[str]]:
+    """Build SLR(1) ACTION and GOTO tables."""
+    aug = grammar.augment()
+    states, transitions = build_lr0_automaton(grammar)
+
+    first = compute_first(grammar)
+    follow = compute_follow(grammar, first)
+
+    aug_start = aug.start
+    aug_body = tuple(aug.productions[aug_start][0])
+
+    action: ActionTable = {}
+    goto: GotoTable = {}
+    conflicts: list[str] = []
+
+    def _add_action(state: int, sym: str, entry: tuple) -> None:
+        key = (state, sym)
+        if key in action and action[key] != entry:
+            conflicts.append(f"  Conflict s{state} on '{sym}': {action[key]} vs {entry}")
+        else:
+            action[key] = entry
+
+    for si, state in enumerate(states):
+        for item in state:
+            ns = item.next_symbol()
+            if ns is not None:
+                if ns in aug.terminals:
+                    dest = transitions.get((si, ns))
+                    if dest is not None:
+                        _add_action(si, ns, ('shift', dest))
+            else:
+                if item.head == aug_start and item.body == aug_body:
+                    _add_action(si, EOF, ('accept',))
+                else:
+                    # SLR(1): reduce only on tokens in FOLLOW(head)
+                    for t in follow.get(item.head, frozenset()):
+                        _add_action(si, t, ('reduce', item.head, item.body))
+
+    for (si, sym), dest in transitions.items():
+        if sym in grammar.non_terminals:
+            goto[(si, sym)] = dest
+
+    return action, goto, conflicts
+
+
+def run_slr1(grammar: Grammar, tokens: list[str], *, show_table: bool = True) -> bool:
+    action, goto, conflicts = build_slr1_tables(grammar)
+    n = len(build_lr0_automaton(grammar)[0])
+    terms = sorted(grammar.terminals)
+    nts = sorted(grammar.non_terminals)
+
+    print("\n=== SLR(1) ===")
+    if conflicts:
+        print("Conflicts detected (grammar is NOT SLR(1)):")
+        for c in conflicts:
+            print(c)
+
+    if show_table:
+        print_lr_table(action, goto, n, terms, nts, "SLR(1)")
+
+    return simulate_lr(action, goto, tokens, "SLR(1)")
