@@ -53,7 +53,8 @@ export function Sidebar() {
       </nav>
 
       <div className="px-3 mt-auto pt-4 border-t border-neutral-100">
-        <p className="text-[10px] text-neutral-400">Flask API · localhost:5000</p>
+        {/* <p className="text-[10px] text-neutral-400">Flask API · localhost:5000</p> */}
+        <p className="text-[10px] text-neutral-400">Flask API Serverless</p>
       </div>
     </aside>
   )
