@@ -3,14 +3,18 @@
 import { useState, useRef, useCallback } from 'react'
 import { Play, Loader2, Keyboard } from 'lucide-react'
 import { VirtualKeyboard } from './VirtualKeyboard'
+import { GrammarZooSelector } from './GrammarZooSelector'
+import type { GrammarExample } from '@/lib/grammarZoo'
 
 interface Props {
   grammar: string
   tokens: string
   loading: boolean
+  parserKey: string
   onGrammarChange: (v: string) => void
   onTokensChange:  (v: string) => void
   onSubmit: () => void
+  onLoadExample?: (example: GrammarExample) => void
 }
 
 function insertAt(
@@ -30,7 +34,10 @@ function insertAt(
   })
 }
 
-export function GrammarPanel({ grammar, tokens, loading, onGrammarChange, onTokensChange, onSubmit }: Props) {
+export function GrammarPanel({
+  grammar, tokens, loading, parserKey,
+  onGrammarChange, onTokensChange, onSubmit, onLoadExample,
+}: Props) {
   const [focused,   setFocused]   = useState<'grammar' | 'tokens'>('grammar')
   const [kbVisible, setKbVisible] = useState(true)
   const grammarRef = useRef<HTMLTextAreaElement>(null)
@@ -50,6 +57,13 @@ export function GrammarPanel({ grammar, tokens, loading, onGrammarChange, onToke
 
   return (
     <div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
+      {/* Grammar Zoo Selector */}
+      {onLoadExample && (
+        <div className="border-b border-neutral-100 px-4 py-3 bg-neutral-50/40">
+          <GrammarZooSelector parserKey={parserKey} onSelect={onLoadExample} />
+        </div>
+      )}
+
       {/* Virtual Keyboard */}
       <div className="border-b border-neutral-100 px-4 py-3">
         <div className="flex items-center justify-between mb-2.5">

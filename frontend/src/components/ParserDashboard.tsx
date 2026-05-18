@@ -17,6 +17,7 @@ import { HistoryExport }        from './HistoryExport'
 import { AutomataViewer }       from './AutomataViewer'
 import { ComparativePanel }     from './ComparativePanel'
 import type { ParseResult }     from '@/lib/types'
+import type { GrammarExample }  from '@/lib/grammarZoo'
 
 const LR_TABLE_API: Record<string, (g: string) => Promise<any>> = {
   lr0: api.lr0Table, slr1: api.slr1Table, lr1: api.lr1Table, lalr1: api.lalr1Table,
@@ -129,6 +130,13 @@ export function ParserDashboard({ parserKey }: { parserKey: string }) {
     setGrammar(g); setTokenStr(t); setResult(null); setError(null)
   }, [])
 
+  const handleLoadExample = useCallback((ex: GrammarExample) => {
+    setGrammar(ex.grammar)
+    setTokenStr(ex.validTokens)
+    setResult(null)
+    setError(null)
+  }, [])
+
   if (!config) {
     return (
       <div className="flex h-full items-center justify-center text-neutral-400 text-sm">
@@ -175,9 +183,11 @@ export function ParserDashboard({ parserKey }: { parserKey: string }) {
               grammar={grammar}
               tokens={tokenStr}
               loading={loading}
+              parserKey={parserKey}
               onGrammarChange={setGrammar}
               onTokensChange={setTokenStr}
               onSubmit={run}
+              onLoadExample={handleLoadExample}
             />
             <HistoryExport
               grammar={grammar}

@@ -65,7 +65,7 @@ State0 = frozenset[LR0Item]
 
 def _closure0(items: set[LR0Item], grammar: Grammar) -> State0:
     result = set(items)
-    worklist = list(items)
+    worklist = sorted(items, key=str)
     while worklist:
         item = worklist.pop()
         B = item.next_symbol()
@@ -96,10 +96,11 @@ def build_lr0_automaton(
     transitions: dict[tuple[int, str], int] = {}
     worklist: list[State0] = [initial]
 
-    all_symbols = aug.non_terminals | aug.terminals
+    # Sorted symbols → deterministic state numbering across runs/machines
+    all_symbols = sorted(aug.non_terminals | aug.terminals)
 
     while worklist:
-        s = worklist.pop()
+        s = worklist.pop(0)   # FIFO → canonical BFS order
         si = state_idx[s]
         for sym in all_symbols:
             ns = _goto0(s, sym, aug)
@@ -122,7 +123,7 @@ State1 = frozenset[LR1Item]
 def _closure1(items: set[LR1Item], grammar: Grammar,
               first: dict[str, frozenset[str]]) -> State1:
     result = set(items)
-    worklist = list(items)
+    worklist = sorted(items, key=str)
     while worklist:
         item = worklist.pop()
         B = item.next_symbol()
@@ -162,10 +163,11 @@ def build_lr1_automaton(
     transitions: dict[tuple[int, str], int] = {}
     worklist: list[State1] = [initial]
 
-    all_symbols = aug.non_terminals | aug.terminals
+    # Sorted symbols → deterministic state numbering across runs/machines
+    all_symbols = sorted(aug.non_terminals | aug.terminals)
 
     while worklist:
-        s = worklist.pop()
+        s = worklist.pop(0)   # FIFO → canonical BFS order
         si = state_idx[s]
         for sym in all_symbols:
             ns = _goto1(s, sym, aug, first)
