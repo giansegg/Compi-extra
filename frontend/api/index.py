@@ -4,10 +4,17 @@ The Ultimate Parser App – Flask API server para Vercel Serverless.
 from __future__ import annotations
 
 import io
+import os
 import sys
 import traceback
 from contextlib import redirect_stdout
 from typing import Any
+
+# Garantiza que la raíz del proyecto esté en sys.path para que
+# 'from api.xxx import ...' funcione correctamente en Vercel Serverless.
+_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _root not in sys.path:
+    sys.path.insert(0, _root)
 
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
