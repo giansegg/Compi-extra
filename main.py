@@ -6,19 +6,23 @@ Grammars used:
   G_LR  – classic left-recursive arithmetic grammar  (for LR family)
 """
 import sys
+import os
 import io
 
 # Force UTF-8 output so special characters print correctly on Windows.
 if hasattr(sys.stdout, 'buffer'):
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-from grammar import Grammar
-from first_follow import compute_first, compute_follow, print_first_follow
-from ll1_parser import build_ll1_table, print_ll1_table, simulate_ll1
-from recursive_descent import RecursiveDescentParser
-from lr0_parser import run_lr0
-from slr1_parser import run_slr1
-from lr1_parser import run_lr1
-from lalr1_parser import run_lalr1
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "frontend"))
+
+from api.grammar import Grammar
+from api.first_follow import compute_first, compute_follow, print_first_follow
+from api.ll1_parser import build_ll1_table, print_ll1_table, simulate_ll1
+from api.recursive_descent import RecursiveDescentParser
+from api.lr0_parser import run_lr0
+from api.slr1_parser import run_slr1
+from api.lr1_parser import run_lr1
+from api.lalr1_parser import run_lalr1
 
 # ─────────────────────────────── grammars
 
